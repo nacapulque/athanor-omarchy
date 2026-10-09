@@ -4,10 +4,37 @@ Scope: the two published themes, `athanor-umber` and `athanor-vellum`.
 Orpiment, Cinnabar and a custom boot wordmark are out of scope (decided
 2026-10-09).
 
-## Where things stand
+## Resume here (2026-10-09)
 
-Both themes are on `main` (Umber `2045a1b`, Vellum `6e613cd`), `main` is
-protected (PRs only, linear history), and no PRs are open. Each ships
+**Done:** Phases 0–2 are merged into this repo's `main`. Phase 3 is
+[PR #4](https://github.com/nacapulque/athanor-omarchy/pull/4): CI is green and
+it's waiting on review and merge. Its branch `worktree-phase-3` is checked out
+in the worktree `.claude/worktrees/phase-3`.
+
+**Next:**
+1. Merge PR #4 with rebase, then clean up (see "Phase routine" in `CLAUDE.md`).
+2. Phase 4: README template polish and the opt-in "Make it feel like Athanor" snippets.
+3. Phase 5: publish with `scripts/publish.sh umber -m …` and `scripts/publish.sh vellum -m …`.
+
+**The theme repos haven't changed since this plan started.** Both are still
+at their shell-surfaces commits (Umber `2045a1b`, Vellum `6e613cd`). Phase 5
+will publish these changes to them:
+
+| File | Change | From |
+|---|---|---|
+| `btop.theme`, `vscode-theme.json` | added | Phase 2 |
+| `shell.launcher.toml` | drops the unread `border-width` | Phase 1 |
+| `shell.lock.toml` | idle border matches the accent | Phase 2 |
+| `preview.png` | private screenshot | Phase 3 |
+| `README.md` | lists the new files, new alt text, plus Phase 4 | Phases 2–4 |
+
+Check before publishing with `scripts/publish.sh <theme>`, which is a dry run
+without `-m`.
+
+## Where things stood at the audit (2026-10-09)
+
+Both themes were on `main` (Umber `2045a1b`, Vellum `6e613cd`), `main` was
+protected (PRs only, linear history), and no PRs were open. Each ships
 `colors.toml`, 10 `shell.*.toml` sections, 8 dithered Doré plates plus
 `omarchy.png`, previews and a README. Everything else Omarchy generates from
 `colors.toml`.
@@ -35,7 +62,7 @@ protected (PRs only, linear history), and no PRs are open. Each ships
 
 1. **Installed themes may ship `btop.theme` and `vscode-theme.json`.** Only `*.lua`, terminal configs and `vscode.json` are dropped (`INSTALLED_THEME_DENIED` in `omarchy-theme-set`). Holds.
 2. **The btop and VS Code templates use only plain `{{ key }}` placeholders,** with no `mix` or gradient helpers, so the build can render them from `/usr/share/omarchy/default/themed/` and patch a few keys. Holds.
-3. **Intro videos (`backgrounds/intros/*.mp4`).** Documented upstream, but the installed Omarchy is `4.0.0.alpha` and nothing in it reads `intros`. **Fails**, so this is deferred to "Later".
+3. **Intro videos (`backgrounds/intros/*.mp4`).** Documented upstream, but nothing in the installed Omarchy (package 4.0.4, whose `version` file says `4.0.0.alpha`) reads `intros`. **Fails**, so this is deferred to "Later".
 
 ## Phase 0: Source monorepo (about 2–3 h): done
 
@@ -120,9 +147,17 @@ Fix findings 2, 3 and 7 without touching the palette's identity.
 - Applied with `omarchy theme set`: the btop selected row is readable on Vellum, and a VS Code selection and current line are visible on both, checked with screenshots.
 - `hyprctl configerrors` is clean.
 
-## Phase 3: Reproducible, private previews (about 1 h)
+## Phase 3: Reproducible, private previews (about 1 h): done
 
 Fix finding 4.
+
+**Outcome.** `scripts/shoot-previews.sh` replaced both previews.
+- The OCR check covers `$USER`, the hostname, `/home/` and the DMI product name and version.
+- Two runs gave identical window geometry.
+- Changes from the scope:
+  - The third pane also lists Athanor's source tree with plain `ls`. Its history is only 3 commits, and `ls -l` would print the owner's username.
+  - fastfetch's logo and keys use ANSI yellow, so they follow each theme instead of fastfetch's built-in lime.
+  - fastfetch's shell and terminal lines were dropped: it reads both from its parent processes, which the script controls.
 
 **Scope**
 - `scripts/shoot-previews.sh`, the guarded version from this session:
