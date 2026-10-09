@@ -70,9 +70,15 @@ Verified: both builds match `main` of their theme repos (text byte-identical, PN
 - `build` reproduces both themes' current `main`: text files byte-identical, PNGs pixel-identical (`magick compare -metric AE` = 0).
 - `publish.sh umber` with no changes reports "nothing to publish".
 
-## Phase 1: Tests and CI (about 1–1.5 h)
+## Phase 1: Tests and CI (about 1–1.5 h): done
 
 Lock in what this session tuned by hand.
+
+**Outcome.** 143 tests, run in CI on Python 3.11 and 3.13 and required on `main`. Writing them found two issues:
+- `[launcher]` set `border-width`, which nothing reads: the menu plugin draws the launcher with `[menu]` tokens. Removed. The theme repos pick this up in Phase 5.
+- The first version of the ramp test used an arbitrary 1.3:1 limit for recessed backgrounds. It now requires them to stay quieter than the selection.
+
+Weakening the background floor changed nothing, because it never binds: text that clears 4.5:1 on `lighter_background` already has about 5.3:1 on the background. Weakening the `lighter_background` floor fails 10 tests.
 
 **Scope**
 - `pytest` suite:
