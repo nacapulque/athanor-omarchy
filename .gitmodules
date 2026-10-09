@@ -1,0 +1,3 @@
+[submodule "vendor/athanor"]
+	path = vendor/athanor
+	url = https://github.com/script-wizards/athanor
