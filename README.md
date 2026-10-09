@@ -88,7 +88,9 @@ and takes over the screen for about 20 seconds per theme.
 | `assets/previews/` | Desktop screenshots used as each theme's `preview.png`, from `scripts/shoot-previews.sh` |
 | `assets/preview/` | What the preview panes run |
 
-The plan for this repo is in [docs/PLAN.md](docs/PLAN.md).
+The plan for this repo and its current status are in
+[docs/PLAN.md](docs/PLAN.md). Render it with
+`python -I scripts/render-plan.py docs/PLAN.md ~/claude-plan.html`.
 
 ## License
 
