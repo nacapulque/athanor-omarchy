@@ -70,7 +70,8 @@ pulls new versions of the theme.
 
 | File | What it does |
 |---|---|
-| `colors.toml` | The palette. Omarchy generates the terminal, Hyprland, Neovim, btop, Helix, VS Code and shell colors from it. |
+| `colors.toml` | The palette. Omarchy generates the terminal, Hyprland, Neovim, Helix and shell colors from it. |
+| `btop.theme`, `vscode-theme.json` | Omarchy's own btop and VS Code themes, with fixes: the selected btop row in foreground text, and VS Code selections and the current line made visible. |
 | `shell.bar.toml` | The status bar in Athanor's own bar colors. |
 | `shell.*.toml` | The rest of the Omarchy shell in Athanor's style. See [Shell](#shell). |
 | `backgrounds/` | {NUMBERS[plates]} Doré plates plus the Omarchy logo wallpaper. |
