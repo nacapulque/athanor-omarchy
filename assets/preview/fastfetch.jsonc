@@ -1,0 +1,25 @@
+// fastfetch for theme previews: software only. No user, host, hardware model,
+// disks, network or locale, so a screenshot says nothing about the machine.
+// Colors are ANSI names, so the logo and keys follow the theme's palette
+// instead of fastfetch's built-in truecolor.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "padding": { "top": 1, "right": 3 },
+    "color": { "1": "yellow", "2": "yellow", "3": "yellow", "4": "yellow", "5": "yellow", "6": "yellow" }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "yellow", "output": "default" }
+  },
+  "modules": [
+    "break",
+    { "type": "os", "key": "os      " },
+    { "type": "kernel", "key": "kernel  " },
+    { "type": "wm", "key": "wm      " },
+    { "type": "icons", "key": "icons   " },
+    { "type": "packages", "key": "packages" },
+    "break",
+    { "type": "colors", "symbol": "block" }
+  ]
+}

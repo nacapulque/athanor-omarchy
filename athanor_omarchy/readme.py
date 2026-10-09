@@ -54,7 +54,7 @@ Athanor's four color schemes are the stages of the Magnum Opus. {label} is
 [Athanor {o_label}]({REPO.format(other)})
 (*{o_stage}*).
 
-![Athanor {label} desktop with btop, Neovim and fastfetch](preview.png)
+![Athanor {label} desktop with Neovim, fastfetch and the terminal palette](preview.png)
 
 ## Install
 

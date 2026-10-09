@@ -56,6 +56,24 @@ To compare a build with a checkout by hand:
 python -m athanor_omarchy diff dist/athanor-umber ~/.config/omarchy/themes/athanor-umber
 ```
 
+## Previews
+
+```sh
+scripts/shoot-previews.sh            # umber and vellum
+scripts/shoot-previews.sh vellum
+```
+
+This takes each theme's `preview.png` on the real desktop. It applies the
+build as a temporary `athanor-<theme>-preview` theme and opens three panes on
+an empty workspace 9: Neovim with Athanor's `planetary.c`, a fastfetch that
+lists only software (`assets/preview/fastfetch.jsonc`), and Athanor's git
+history with the palette (`assets/preview/pane.sh`). It OCRs the shot and
+refuses to save it if your username, hostname, a home path or the hardware
+model shows up. It aborts if workspace 9 isn't empty or a pane lands
+elsewhere, and restores your workspace and theme when it exits. It needs a
+Hyprland Lua config, foot, nvim, fastfetch, grim, tesseract and ImageMagick 7,
+and takes over the screen for about 20 seconds per theme.
+
 ## Layout
 
 | Path | What |
@@ -67,7 +85,8 @@ python -m athanor_omarchy diff dist/athanor-umber ~/.config/omarchy/themes/athan
 | `athanor_omarchy/readme.py` | The themes' README and LICENSE |
 | `vendor/athanor` | Athanor, pinned as a submodule: the palette and the plates |
 | `assets/omarchy/` | Omarchy's unlock wordmark and logo wallpaper, recolored per theme |
-| `assets/previews/` | Desktop screenshots used as each theme's `preview.png` |
+| `assets/previews/` | Desktop screenshots used as each theme's `preview.png`, from `scripts/shoot-previews.sh` |
+| `assets/preview/` | What the preview panes run |
 
 The plan for this repo is in [docs/PLAN.md](docs/PLAN.md).
 
