@@ -120,9 +120,17 @@ Fix findings 2, 3 and 7 without touching the palette's identity.
 - Applied with `omarchy theme set`: the btop selected row is readable on Vellum, and a VS Code selection and current line are visible on both, checked with screenshots.
 - `hyprctl configerrors` is clean.
 
-## Phase 3: Reproducible, private previews (about 1 h)
+## Phase 3: Reproducible, private previews (about 1 h): done
 
 Fix finding 4.
+
+**Outcome.** `scripts/shoot-previews.sh` replaced both previews.
+- The OCR check covers `$USER`, the hostname, `/home/` and the DMI product name and version.
+- Two runs gave identical window geometry.
+- Changes from the scope:
+  - The third pane also lists Athanor's source tree with plain `ls`. Its history is only 3 commits, and `ls -l` would print the owner's username.
+  - fastfetch's logo and keys use ANSI yellow, so they follow each theme instead of fastfetch's built-in lime.
+  - fastfetch's shell and terminal lines were dropped: it reads both from its parent processes, which the script controls.
 
 **Scope**
 - `scripts/shoot-previews.sh`, the guarded version from this session:
