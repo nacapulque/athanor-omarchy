@@ -79,7 +79,6 @@ background-alpha          = 1.0
 text                      = "{fg}"
 border                    = "{accent}"
 border-alpha              = 1.0
-border-width              = 2
 scrim                     = "{bg}"
 scrim-alpha               = 0.6
 selected-background       = "{fg}"

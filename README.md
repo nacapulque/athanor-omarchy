@@ -23,6 +23,18 @@ python -m athanor_omarchy build --theme orpiment --theme cinnabar
 
 The build prints each theme's key contrast ratios.
 
+## Test
+
+```sh
+uv run --no-project --with pytest pytest     # or: python -m pytest
+```
+
+The tests pin what the themes promise: contrast floors for every text color on
+every surface, the neutral ramp's order, canonical `colors.toml` keys, and that
+each `shell.<section>.toml` restates its whole section of Omarchy's template
+(snapshotted in `tests/fixtures/`). The end-to-end build test needs ImageMagick
+7 and skips without it. CI runs everything else on every PR.
+
 ## Publish
 
 ```sh
