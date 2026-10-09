@@ -1,0 +1,10 @@
+[project]
+name = "athanor-omarchy"
+version = "0.1.0"
+description = "Build the Athanor Omarchy themes from script-wizards/athanor"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = []
+
+[tool.ruff]
+line-length = 120

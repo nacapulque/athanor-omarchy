@@ -37,10 +37,18 @@ protected (PRs only, linear history), and no PRs are open. Each ships
 2. **The btop and VS Code templates use only plain `{{ key }}` placeholders,** with no `mix` or gradient helpers, so the build can render them from `/usr/share/omarchy/default/themed/` and patch a few keys. Holds.
 3. **Intro videos (`backgrounds/intros/*.mp4`).** Documented upstream, but the installed Omarchy is `4.0.0.alpha` and nothing in it reads `intros`. **Fails**, so this is deferred to "Later".
 
-## Phase 0: Source monorepo (about 2–3 h)
+## Phase 0: Source monorepo (about 2–3 h): done
 
 Put the generator under version control and make the two theme repos build
 outputs.
+
+**Outcome.** Built as scoped, with these differences:
+- The comparison lives in `python -m athanor_omarchy diff`, which `publish.sh` also uses.
+- Omarchy's unlock wordmark and logo wallpaper are vendored in `assets/omarchy/`, so the build doesn't need Omarchy installed. CI needs this.
+- The hand-taken desktop previews are `assets/previews/<theme>.png` until Phase 3 replaces them.
+- `publish.sh` copies only changed files and has a dry-run mode, which runs whenever `-m` isn't given.
+
+Verified: both builds match `main` of their theme repos (text byte-identical, PNGs pixel-identical), `publish.sh` reports "nothing to publish" for both, and a deliberately drifted clone is reported correctly.
 
 **Scope**
 - Create `~/Projects/athanor-omarchy` (public repo `nacapulque/athanor-omarchy`), protected `main` like the theme repos.
