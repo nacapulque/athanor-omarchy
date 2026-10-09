@@ -4,7 +4,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from . import images
+from . import apps, images
 from .color import contrast
 from .compare import compare
 from .palette import PALETTE, THEMES, colors_toml, theme_colors
@@ -22,6 +22,8 @@ def build_theme(name, out, width=3840, height=2160, pixel=4):
     d.mkdir(parents=True, exist_ok=True)
 
     (d / "colors.toml").write_text(colors_toml(name, c))
+    (d / "btop.theme").write_text(apps.btop_theme(c))
+    (d / "vscode-theme.json").write_text(apps.vscode_theme(c))
     (d / "icons.theme").write_text(THEMES[name]["icons"] + "\n")
     (d / "shell.bar.toml").write_text(bar_section(p))
     for section, body in shell_sections(p, c).items():

@@ -90,9 +90,18 @@ Weakening the background floor changed nothing, because it never binds: text tha
 
 **Acceptance**: CI is green, and changing one color to break a floor makes CI fail.
 
-## Phase 2: App contrast fixes (about 1.5 h)
+## Phase 2: App contrast fixes (about 1.5 h): done
 
 Fix findings 2, 3 and 7 without touching the palette's identity.
+
+**Outcome.**
+- `athanor_omarchy/apps.py` renders the two templates, snapshotted from omarchy 4.0.4 in `assets/omarchy/themed/` so CI doesn't need Omarchy, then applies three exact-match patches.
+- A test checks that the unpatched render equals what `omarchy theme set` generated, byte for byte, on both themes.
+- On screen, through temporary preview themes:
+  - Vellum's btop selected row reads in ink.
+  - VS Code selections render opaque: `#393126` on Umber, about 1.46:1.
+  - The current line is exactly `lighter_background` on both themes.
+- The VS Code visibility floor is 1.25:1, grounded in the 22 stock themes (selection 1.21–2.45:1, median 1.43). Unpublished Cinnabar sits at 1.40.
 
 **Scope**
 - Render `btop.theme.tpl` and `vscode-theme.json.tpl` from the Omarchy templates at build time (plain `{{ key }}` substitution, including the derived `selection_background`, `selection_foreground` and `theme_type`), then apply targeted patches:
