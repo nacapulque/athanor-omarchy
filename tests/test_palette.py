@@ -49,7 +49,21 @@ def test_bright_variants(theme, hue):
 def test_accent_and_dim_text(theme):
     _, c = theme
     assert contrast(c["accent"], c["background"]) >= 4.5
+    assert contrast(c["accent"], c["lighter_background"]) >= 4.5
     assert contrast(c["dark_foreground"], c["background"]) >= 3.0
+
+
+def test_hyprland_borders_follow_the_tuned_colors(theme):
+    _, c = theme
+    assert c["hyprland_active_border"] == f"rgb({c['accent'][1:]})"
+    assert c["hyprland_inactive_border"] == f"rgb({c['selection'][1:]})"
+
+
+def test_vellum_plate_ink_is_quieter_than_umber_but_visible():
+    """Review Improve 4: both desk plates sit between 2.0 and 2.4:1 ink on paper."""
+    for name in ("umber", "vellum"):
+        ink, paper = PALETTE[name]["wall_desk"]
+        assert 2.0 <= contrast(ink, paper) <= 2.4, name
 
 
 def test_inverse_selection(theme):
@@ -63,6 +77,10 @@ def test_bar_and_tooltip(theme):
     p = PALETTE[name]
     assert contrast(p["barfg"], p["bar"]) >= 4.5
     assert contrast(p["bar_warn"], p["bar"]) >= 4.5
+    # The bar shows the accent too (clock, active modules). Orpiment and Cinnabar
+    # have inverted bars where this doesn't hold yet; they stay unpublished.
+    if name in ("umber", "vellum"):
+        assert contrast(theme_colors(name)["accent"], p["bar"]) >= 4.5
 
 
 def test_neutral_ramp(theme):

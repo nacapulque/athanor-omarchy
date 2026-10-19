@@ -15,7 +15,7 @@ KEY = re.compile(r"^(#\s*)?([a-z][a-z0-9-]*)\s*=")
 # Sections whose border goes through Border.surfaceSpec, which reads `border-width`
 # for any section even where the template doesn't mention it (omarchy 4.0.4:
 # Menu.qml, PolkitAgent.qml, LockView.qml, NotificationCard.qml, popups, tooltips).
-# [launcher] isn't one: the menu plugin draws the launcher with [menu]'s tokens.
+# [launcher] is not emitted at all: nothing in the shell reads it (omarchy 4.0.5).
 READS_BORDER_WIDTH = {"menu", "popups", "tooltip", "notifications", "polkit", "lock"}
 
 
@@ -57,3 +57,16 @@ def test_sections_restate_every_key(name):
 def test_section_files_have_their_header(name):
     for section, text in emitted(name).items():
         assert text.startswith(f"[{section}]\n")
+
+
+SHELL_QML = Path("/usr/share/omarchy/shell")
+
+
+@pytest.mark.skipif(not SHELL_QML.exists(), reason="needs an installed Omarchy")
+def test_launcher_section_is_still_unread():
+    """We stopped shipping shell.launcher.toml because no QML reads a launcher.* token.
+    Tokens are read as quoted "section.key" strings (e.g. "menu.background"); the quote
+    keeps the filename launcher.hides in AppLibrary.qml from matching. If this fails after
+    an Omarchy update, bring the section back in shell.py."""
+    hits = [p for p in SHELL_QML.rglob("*.qml") if re.search(r'"launcher\.[a-z-]+', p.read_text())]
+    assert hits == [], hits

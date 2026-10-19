@@ -12,8 +12,12 @@ pytestmark = pytest.mark.skipif(shutil.which("magick") is None, reason="needs Im
 
 
 def test_build_writes_a_complete_theme(tmp_path):
-    build_theme("umber", tmp_path, width=192, height=108, pixel=2)
     d = tmp_path / "athanor-umber"
+    d.mkdir()
+    (d / "shell.launcher.toml").write_text("[launcher]\n")  # left over from an older build
+    build_theme("umber", tmp_path, width=192, height=108, pixel=2)
+    assert not (d / "shell.launcher.toml").exists(), "stale section files must be removed"
+    assert len(list(d.glob("shell.*.toml"))) == 9
     expected = {"colors.toml", "icons.theme", "LICENSE", "README.md", "unlock.png", "preview.png", "preview-unlock.png", "shell.bar.toml"}
     assert expected <= {p.name for p in d.iterdir()}
     assert sorted(p.name for p in (d / "backgrounds").iterdir()) == sorted([*plate_names(), "omarchy.png"])
