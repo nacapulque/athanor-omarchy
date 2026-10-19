@@ -7,16 +7,15 @@ Orpiment, Cinnabar and a custom boot wordmark are out of scope (decided
 
 ## Resume here (2026-10-18)
 
-**Done:** Phases 0–3 are merged. Phase 4 is
-[PR #5](https://github.com/nacapulque/athanor-omarchy/pull/5), waiting on
-Raúl's review and merge; its branch `worktree-phase-4` is checked out in
-`.claude/worktrees/phase-4`.
+**Done:** Phases 0–4 are merged. Phase 5 is
+[PR #6](https://github.com/nacapulque/athanor-omarchy/pull/6), waiting on
+Raúl's review and merge; its branch `worktree-phase-5` is checked out in
+`.claude/worktrees/phase-5`.
 
 **Next, in order:**
-1. Merge PR #5 with rebase and clean up (see "Phase routine" in `CLAUDE.md`).
-2. Phase 5: previews that show the shell.
-3. Phase 6: README template and the opt-in section.
-4. Phase 7: publish both themes.
+1. Merge PR #6 with rebase and clean up (see "Phase routine" in `CLAUDE.md`).
+2. Phase 6: README template and the opt-in section.
+3. Phase 7: publish both themes.
 
 **The theme repos haven't changed since this plan started** (Umber `2045a1b`,
 Vellum `6e613cd`). Phase 7 publishes everything below in one PR per repo.
@@ -337,10 +336,15 @@ and the `diff` output from 4.7.
 - `dist/athanor-umber/colors.toml` is byte-identical to the published one.
 - Screenshots show the new accent on the bar and the darker plate on Vellum.
 
-## Phase 5: Previews that show the shell (about 1 h)
+## Phase 5: Previews that show the shell (about 1 h): in PR #6
 
 Review Improve 5. The current previews never show a shell surface, and the
 Neovim pane is mostly empty. Needs the desktop; it can't run in CI.
+
+**Outcome.** Built as written. The menu appeared within the 1.5 s wait on
+both runs, both shots passed the OCR guard, and the layout JSON is the same
+one Phase 3 recorded. The previews now carry Phase 4's colors too (Vellum's
+accent on the menu rule, the darker plate ink). Took about 20 s per theme.
 
 ### 5.1 Script changes
 
