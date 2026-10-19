@@ -7,17 +7,16 @@ Orpiment, Cinnabar and a custom boot wordmark are out of scope (decided
 
 ## Resume here (2026-10-18)
 
-**Done:** Phases 0–3. Phase 3 is
-[PR #4](https://github.com/nacapulque/athanor-omarchy/pull/4): CI green,
-mergeable, waiting on Raúl's merge. Its branch `worktree-phase-3` is checked
-out in `.claude/worktrees/phase-3`.
+**Done:** Phases 0–3 are merged. Phase 4 is
+[PR #5](https://github.com/nacapulque/athanor-omarchy/pull/5), waiting on
+Raúl's review and merge; its branch `worktree-phase-4` is checked out in
+`.claude/worktrees/phase-4`.
 
 **Next, in order:**
-1. Merge PR #4 with rebase and clean up (see "Phase routine" in `CLAUDE.md`).
-2. Phase 4: palette and shell fixes from the review.
-3. Phase 5: previews that show the shell.
-4. Phase 6: README template and the opt-in section.
-5. Phase 7: publish both themes.
+1. Merge PR #5 with rebase and clean up (see "Phase routine" in `CLAUDE.md`).
+2. Phase 5: previews that show the shell.
+3. Phase 6: README template and the opt-in section.
+4. Phase 7: publish both themes.
 
 **The theme repos haven't changed since this plan started** (Umber `2045a1b`,
 Vellum `6e613cd`). Phase 7 publishes everything below in one PR per repo.
@@ -115,11 +114,25 @@ that OCRs to the username, hostname, a home path or the hardware model.
 The audit tables these phases answered are in git history
 (`git show d8d5b03:docs/PLAN.md`).
 
-## Phase 4: Palette and shell fixes (about 2 h)
+## Phase 4: Palette and shell fixes (about 2 h): in PR #5
 
 Review items Fix 1–3, Improve 4 and 6, and the two hygiene items. Vellum
 changes visibly: accent one step darker, plates one step darker, no dead
 launcher file. Umber's output must not change except for the missing file.
+
+**Outcome.** Built as written; every "expected" line in 4.2 and 4.7 matched.
+Two things the steps didn't foresee:
+- `build_theme()` never removed files it stopped emitting, so the first
+  `diff` still showed `M shell.launcher.toml` from the previous build. It now
+  deletes stale `shell.*.toml` first, and `tests/test_build.py` checks that.
+- The accent-on-bar assertion (4.3) fails for Orpiment, whose inverted dark
+  bar puts its accent at 2.27:1. It is scoped to the published themes; the
+  unpublished pair needs its own pass ("Later").
+- Changing the accent also changes the seven Vellum `shell.*.toml` that carry
+  it, so Phase 7's expected list for Vellum includes them.
+163 tests pass. On screen, through a temporary theme: the menu card and the
+active window border show the new amber, the plate reads at the window
+edges, `hyprctl configerrors` is empty.
 
 ### 4.1 Freeze the app fixtures' colors
 
@@ -470,9 +483,11 @@ scripts/publish.sh vellum
 ```
 Expected Umber: `A btop.theme`, `A vscode-theme.json`, `D shell.launcher.toml`,
 `M README.md`, `M preview.png`, `M shell.lock.toml`. Expected Vellum: the same
-plus `M colors.toml` and `M backgrounds/1-…png` through `7-…png` (the lock
-plate `8-satans-despair.png` keeps its own ink and must not appear). Anything
-else: stop and report.
+plus `M colors.toml`, `M backgrounds/1-…png` through `7-…png` (the lock
+plate `8-satans-despair.png` keeps its own ink and must not appear), and
+`M shell.controls.toml`, `shell.image-picker.toml`, `shell.menu.toml`,
+`shell.notifications.toml`, `shell.polkit.toml`, `shell.popups.toml`, which
+carry the accent. Anything else: stop and report.
 
 ### 7.2 Open the PRs
 
