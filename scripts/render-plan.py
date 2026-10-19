@@ -1,5 +1,7 @@
 """Render docs/PLAN.md to a self-contained HTML page with a sidebar TOC.
 
+Handles headings, paragraphs, tables, nested lists and fenced code blocks (also inside list items).
+
 usage: python -I scripts/render-plan.py docs/PLAN.md ~/claude-plan.html
 """
 
@@ -36,11 +38,25 @@ def flush_para():
         para.clear()
 
 
+def fence(start):
+    """Consume a ``` block starting at lines[start]; return (html, next index)."""
+    j, buf = start + 1, []
+    while j < len(lines) and not lines[j].startswith("```"):
+        buf.append(lines[j])
+        j += 1
+    return "<pre><code>" + html.escape("\n".join(buf), quote=False) + "</code></pre>", j + 1
+
+
 while i < len(lines):
     line = lines[i]
     if not line.strip():
         flush_para()
         i += 1
+        continue
+    if line.startswith("```"):
+        flush_para()
+        code, i = fence(i)
+        body.append(code)
         continue
     m = re.match(r"^(#{1,3}) (.+)$", line)
     if m:
@@ -68,18 +84,31 @@ while i < len(lines):
     if re.match(r"^\s*(-|\d+\.) ", line):
         flush_para()
         ordered = bool(re.match(r"^\d+\.", line))
-        items = []  # (depth, text)
-        while i < len(lines) and (re.match(r"^\s*(-|\d+\.) ", lines[i]) or (lines[i].startswith("  ") and lines[i].strip() and items)):
+        items = []  # [depth, text, extra html]
+        while i < len(lines) and (
+            re.match(r"^\s*(-|\d+\.) ", lines[i])
+            or (lines[i].startswith("  ") and lines[i].strip() and items)
+            or (lines[i].lstrip().startswith("```") and items)
+        ):
             l = lines[i]
+            if l.lstrip().startswith("```"):
+                indent = len(l) - len(l.lstrip())
+                j, buf = i + 1, []
+                while j < len(lines) and not lines[j].lstrip().startswith("```"):
+                    buf.append(lines[j][indent:] if lines[j][:indent].strip() == "" else lines[j])
+                    j += 1
+                items[-1][2] += "<pre><code>" + html.escape("\n".join(buf), quote=False) + "</code></pre>"
+                i = j + 1
+                continue
             mm = re.match(r"^(\s*)(?:-|\d+\.) (.*)$", l)
             if mm:
-                items.append([len(mm.group(1)) // 2, mm.group(2)])
+                items.append([len(mm.group(1)) // 2, mm.group(2), ""])
             else:
                 items[-1][1] += " " + l.strip()
             i += 1
         tag = "ol" if ordered else "ul"
         h, depth = f"<{tag}>", 0
-        for n, (d, text) in enumerate(items):
+        for n, (d, text, extra) in enumerate(items):
             if d > depth:
                 h += "<ul>"
             elif d < depth:
@@ -87,7 +116,7 @@ while i < len(lines):
             elif n:
                 h += "</li>"
             depth = d
-            h += f"<li>{inline(text)}"
+            h += f"<li>{inline(text)}{extra}"
         h += "</li>" + "</ul></li>" * depth + f"</{tag}>"
         body.append(h)
         continue
@@ -138,6 +167,9 @@ p, li {{ max-width: 72ch; }}
 ul, ol {{ padding-left: 1.3em; }}
 li {{ margin: 4px 0; }}
 code {{ font: 0.86em var(--mono); background: var(--code); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }}
+pre {{ background: var(--code); padding: 12px 14px; border-radius: 6px; overflow-x: auto; font: 13px/1.5 var(--mono); max-width: 100%; }}
+pre code {{ background: none; padding: 0; font: inherit; overflow-wrap: normal; }}
+li pre {{ margin: 8px 0; }}
 a {{ color: var(--accent); }}
 table {{ border-collapse: collapse; margin: 16px 0; font: 14px/1.45 var(--sans); width: 100%; display: block; overflow-x: auto; }}
 th, td {{ text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--rule); }}

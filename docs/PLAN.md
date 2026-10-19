@@ -2,206 +2,521 @@
 
 Scope: the two published themes, `athanor-umber` and `athanor-vellum`.
 Orpiment, Cinnabar and a custom boot wordmark are out of scope (decided
-2026-10-09).
+2026-10-09). The review that produced Phases 4–7 is `docs/REVIEW.md`
+(2026-10-18, against omarchy 4.0.5-1).
 
-## Resume here (2026-10-09)
+## Resume here (2026-10-18)
 
-**Done:** Phases 0–2 are merged into this repo's `main`. Phase 3 is
-[PR #4](https://github.com/nacapulque/athanor-omarchy/pull/4): CI is green and
-it's waiting on review and merge. Its branch `worktree-phase-3` is checked out
-in the worktree `.claude/worktrees/phase-3`.
+**Done:** Phases 0–3. Phase 3 is
+[PR #4](https://github.com/nacapulque/athanor-omarchy/pull/4): CI green,
+mergeable, waiting on Raúl's merge. Its branch `worktree-phase-3` is checked
+out in `.claude/worktrees/phase-3`.
 
-**Next:**
-1. Merge PR #4 with rebase, then clean up (see "Phase routine" in `CLAUDE.md`).
-2. Phase 4: README template polish and the opt-in "Make it feel like Athanor" snippets.
-3. Phase 5: publish with `scripts/publish.sh umber -m …` and `scripts/publish.sh vellum -m …`.
+**Next, in order:**
+1. Merge PR #4 with rebase and clean up (see "Phase routine" in `CLAUDE.md`).
+2. Phase 4: palette and shell fixes from the review.
+3. Phase 5: previews that show the shell.
+4. Phase 6: README template and the opt-in section.
+5. Phase 7: publish both themes.
 
-**The theme repos haven't changed since this plan started.** Both are still
-at their shell-surfaces commits (Umber `2045a1b`, Vellum `6e613cd`). Phase 5
-will publish these changes to them:
+**The theme repos haven't changed since this plan started** (Umber `2045a1b`,
+Vellum `6e613cd`). Phase 7 publishes everything below in one PR per repo.
 
 | File | Change | From |
 |---|---|---|
 | `btop.theme`, `vscode-theme.json` | added | Phase 2 |
-| `shell.launcher.toml` | drops the unread `border-width` | Phase 1 |
+| `shell.launcher.toml` | removed (nothing reads it) | Phase 4 |
 | `shell.lock.toml` | idle border matches the accent | Phase 2 |
-| `preview.png` | private screenshot | Phase 3 |
-| `README.md` | lists the new files, new alt text, plus Phase 4 | Phases 2–4 |
+| `colors.toml` (Vellum) | accent `#764f06`, inactive border `rgb(c2b492)` | Phase 4 |
+| `backgrounds/*.png` (Vellum) | plate ink `#a49b88` | Phase 4 |
+| `preview.png` | private screenshot with the menu open | Phases 3 and 5 |
+| `README.md` | new files, measured numbers, opt-in section | Phases 2–6 |
 
-Check before publishing with `scripts/publish.sh <theme>`, which is a dry run
-without `-m`.
+## How to run a phase (instructions for the executor)
 
-## Where things stood at the audit (2026-10-09)
+These phases are written for a Claude Sonnet 5.5 session. Follow them
+literally; where a step says "expected", compare the real output with it and
+stop if they differ. Never improvise a number: every ratio and hex value is
+produced by a command in the step.
 
-Both themes were on `main` (Umber `2045a1b`, Vellum `6e613cd`), `main` was
-protected (PRs only, linear history), and no PRs were open. Each ships
-`colors.toml`, 10 `shell.*.toml` sections, 8 dithered Doré plates plus
-`omarchy.png`, previews and a README. Everything else Omarchy generates from
-`colors.toml`.
+**Ground rules**
+- Never edit `~/.config/omarchy/themes/athanor-*`. They are build output.
+- Never commit to `main`. One PR per phase; wait for Raúl's approval before
+  merging and before starting the next phase.
+- Stage files by explicit path. Never `git add -A` or `git add .`.
+- Commit messages end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+  PR bodies end with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+  Write the PR body to a file and pass `--body-file`; the worktree sandbox
+  rejects long inline bodies.
+- `hyprctl dispatch workspace N` fails silently here. Use
+  `hyprctl dispatch 'hl.dsp.focus({ workspace = "9" })'`.
+- The user's shell runs `omapager` and `lock-explorer` instead of Omarchy's
+  notifications and lock, so those two surfaces can't be checked on screen.
 
-### What the audit found
+**Start of every phase**
+```sh
+# 1. From the main checkout, with main up to date:
+git -C ~/Projects/athanor-omarchy pull --ff-only
+# 2. EnterWorktree with name phase-N (branch worktree-phase-N from origin/main), then:
+git submodule update --init
+uv run --no-project --with pytest pytest -q      # expected: all pass (157 before Phase 4)
+python -m athanor_omarchy build                  # expected: two "athanor-…:" report lines, dist/ populated
+```
 
-| # | Finding | Evidence | Severity |
-|---|---|---|---|
-| 1 | The generator that produces both themes exists only in a session temp folder. The theme repos hold hand-copied output. | `find ~ -name build_athanor.py` finds only the scratchpad copy | High: one lost folder away from un-reproducible themes |
-| 2 | Vellum: btop's selected process row is accent on selection at **3.24:1** | generated `btop.theme`: `selected_fg=#7c5510` on `selected_bg=#c2b492` | Medium: the one text pair below 4.5:1 |
-| 3 | VS Code: the editor selection blends to **1.13:1** (Umber) and **1.18:1** (Vellum) against the background, and the current-line highlight is invisible on both | Omarchy's template uses `{{ selection_background }}60` and `{{ background }}60` | Medium: selections barely show |
-| 4 | `preview.png` on both themes shows the author's hostname, `/home/<user>` paths in btop's process list and the laptop model in fastfetch | the published previews | Medium: privacy, and the screenshots are hard to reproduce |
-| 5 | The two READMEs are near-duplicates maintained by hand, and the per-theme facts in them (contrast numbers, hex values) are typed in, not generated | `diff` of the two READMEs | Low: they will drift |
-| 6 | Athanor's square, ruled look depends on Hyprland settings an installed theme cannot ship (`hyprland.lua` is dropped), and on bitmap fonts the theme cannot set | `INSTALLED_THEME_DENIED`; `Style.cornerRadius` mirrors Hyprland rounding | Low: document an opt-in instead |
-| 7 | `lock.border` (the idle rule) is shipped, but the lock view only draws `border-active` and `border-error` | `plugins/lock/LockView.qml:38-39` | Cosmetic: a dead key with a misleading value |
+**On-screen check with a temporary theme** (used by Phases 4 and 6; never
+leave it installed):
+```sh
+prev=$(omarchy theme current)
+rm -rf ~/.config/omarchy/themes/athanor-vellum-preview
+cp -r dist/athanor-vellum ~/.config/omarchy/themes/athanor-vellum-preview
+omarchy theme set athanor-vellum-preview
+# … look / grim … then always:
+omarchy theme set "$prev"
+rm -rf ~/.config/omarchy/themes/athanor-vellum-preview
+```
+Screenshots go in the session scratchpad, never in the repo, unless they come
+from `scripts/shoot-previews.sh`.
 
-### What was checked and is fine
+**End of every phase**
+```sh
+uv run --no-project --with pytest pytest -q
+git status --short                               # only the files the phase names
+git add <explicit paths> && git commit && git push -u origin worktree-phase-N
+gh pr create --title "Phase N: …" --body-file /tmp/claude-1000/…/pr-body.md
+gh pr checks --watch                             # expected: test (3.11) and test (3.13) pass
+```
+Then update the "Resume here" section above, re-render the plan with
+`python -I scripts/render-plan.py docs/PLAN.md ~/claude-plan.html`, commit that
+too, and stop. Raúl merges.
 
-- Terminal and herdr: every ANSI color is at least 5.3:1 on the background, 4.5:1 on raised surfaces and 3.5:1 inside a selection. Herdr's active tab is 5.9:1.
-- btop on Umber: the selected row is 5.15:1. All other btop and VS Code foregrounds are 5.3:1 or more.
-- Shell surfaces: inverted menu rows about 13:1, tooltips 10–11:1. The menu renders as designed on both themes.
-- VS Code list selections look low in a raw check, but they're translucent. Blended, the text on them is 9:1 or better.
+## Phases 0–3: done
 
-### Premises verified
+**Phase 0, source monorepo.** The generator became the package
+`athanor_omarchy` with `build`, `diff` and `scripts/publish.sh`. Both builds
+reproduced the theme repos' `main` byte for byte (PNGs pixel for pixel).
+Omarchy's unlock art is vendored in `assets/omarchy/` so CI needs no Omarchy.
 
-1. **Installed themes may ship `btop.theme` and `vscode-theme.json`.** Only `*.lua`, terminal configs and `vscode.json` are dropped (`INSTALLED_THEME_DENIED` in `omarchy-theme-set`). Holds.
-2. **The btop and VS Code templates use only plain `{{ key }}` placeholders,** with no `mix` or gradient helpers, so the build can render them from `/usr/share/omarchy/default/themed/` and patch a few keys. Holds.
-3. **Intro videos (`backgrounds/intros/*.mp4`).** Documented upstream, but nothing in the installed Omarchy (package 4.0.4, whose `version` file says `4.0.0.alpha`) reads `intros`. **Fails**, so this is deferred to "Later".
+**Phase 1, tests and CI.** 143 tests then, on Python 3.11 and 3.13, required
+on `main`: contrast floors (text ≥ 5.0 on background, ≥ 4.5 on
+`lighter_background`, ≥ 3.0 on selection; bright vs normal ≥ 1.2), ramp order,
+shell completeness against the vendored `shell.toml.tpl`, canonical
+`colors.toml` keys.
 
-## Phase 0: Source monorepo (about 2–3 h): done
+**Phase 2, app contrast.** `apps.py` renders Omarchy's btop and VS Code
+templates (snapshotted from 4.0.4, still identical in 4.0.5) and patches three
+lines: btop's selected row in foreground, VS Code's selection opaque and its
+current line in `lighter_background`. The lock's dead `border` key got the
+accent so it never misleads.
 
-Put the generator under version control and make the two theme repos build
-outputs.
+**Phase 3, private previews.** `scripts/shoot-previews.sh` retakes both
+`preview.png` on workspace 9 with neutral content and refuses to save a shot
+that OCRs to the username, hostname, a home path or the hardware model.
 
-**Outcome.** Built as scoped, with these differences:
-- The comparison lives in `python -m athanor_omarchy diff`, which `publish.sh` also uses.
-- Omarchy's unlock wordmark and logo wallpaper are vendored in `assets/omarchy/`, so the build doesn't need Omarchy installed. CI needs this.
-- The hand-taken desktop previews are `assets/previews/<theme>.png` until Phase 3 replaces them.
-- `publish.sh` copies only changed files and has a dry-run mode, which runs whenever `-m` isn't given.
+The audit tables these phases answered are in git history
+(`git show d8d5b03:docs/PLAN.md`).
 
-Verified: both builds match `main` of their theme repos (text byte-identical, PNGs pixel-identical), `publish.sh` reports "nothing to publish" for both, and a deliberately drifted clone is reported correctly.
+## Phase 4: Palette and shell fixes (about 2 h)
 
-**Scope**
-- Create `~/Projects/athanor-omarchy` (public repo `nacapulque/athanor-omarchy`), protected `main` like the theme repos.
-- Refactor the scratchpad `build_athanor.py` into a small package. Same behavior, no visual changes:
-  - `athanor_omarchy/color.py`: hex/OKLCH, `mix`, `contrast`, `push`
-  - `palette.py`: `colors()` and `tune()`
-  - `shell.py`: `shell_sections()`
-  - `wallpapers.py`: plates, lock plate, `omarchy.png`
-  - `previews.py`: `preview-unlock`
-  - `readme.py`
-  - `build.py`: the CLI, `python -m athanor_omarchy build --theme umber --out dist/`
-- Pin Athanor as a git submodule at the commit used so far (`vendor/athanor`), the only input for `palette.toml` and the plates.
-- `scripts/publish.sh <theme>`: rsync `dist/athanor-<theme>/` into the theme repo clone on a new branch, show `git diff --stat`, push and open a PR. It never pushes to `main`.
-- Move this plan into the repo as `docs/PLAN.md`.
+Review items Fix 1–3, Improve 4 and 6, and the two hygiene items. Vellum
+changes visibly: accent one step darker, plates one step darker, no dead
+launcher file. Umber's output must not change except for the missing file.
 
-**Files**: new repo only. The theme repos are untouched in this phase.
+### 4.1 Freeze the app fixtures' colors
+
+`tests/test_apps.py::test_render_matches_omarchy` renders the templates with
+today's colors and compares with files `omarchy theme set` generated in
+Phase 2. Changing Vellum's accent would break it for the wrong reason. Pin
+the fixtures to the colors they were generated from.
+
+```sh
+python -m athanor_omarchy build
+diff dist/athanor-umber/colors.toml  ~/.config/omarchy/themes/athanor-umber/colors.toml   # expected: no output
+diff dist/athanor-vellum/colors.toml ~/.config/omarchy/themes/athanor-vellum/colors.toml  # expected: no output
+cp ~/.config/omarchy/themes/athanor-umber/colors.toml  tests/fixtures/omarchy-generated/umber/colors.toml
+cp ~/.config/omarchy/themes/athanor-vellum/colors.toml tests/fixtures/omarchy-generated/vellum/colors.toml
+```
+
+In `tests/test_apps.py`, add `import tomllib` and change the test to render
+from the pinned file:
+
+```python
+def test_render_matches_omarchy(name, template):
+    """Before our patches, the renderer reproduces Omarchy's own output byte for byte,
+    given the colors.toml those files were generated from."""
+    colors = tomllib.loads((GENERATED / name / "colors.toml").read_text())
+    tpl = (apps.TEMPLATES / f"{template}.tpl").read_text()
+    assert apps.render(tpl, colors) == (GENERATED / name / template).read_text()
+```
+
+Run the tests: expected all pass, nothing else changed yet.
+
+### 4.2 Palette: accent floor, derived borders, Vellum plate ink
+
+In `athanor_omarchy/palette.py`:
+
+1. After `PALETTE = tomllib.loads(...)`, add the override and apply it:
+```python
+# Per-theme values that differ from Athanor's palette.toml on purpose.
+# Vellum's desk plates were 1.49:1 ink on paper, half of Umber's 2.26:1;
+# this ink is paper mixed 35% toward the foreground, 2.12:1 (docs/REVIEW.md, Improve 4).
+OVERRIDES = {"vellum": {"wall_desk": ["#a49b88", "#ece1c6"]}}
+for _name, _values in OVERRIDES.items():
+    PALETTE[_name].update(_values)
+```
+2. In `tune()`, after the `for k in HUES:` loop and before `dark_foreground`,
+   add the accent floor:
+```python
+    # Accent is text on raised panels (Helix, herdr, btop headers) and on the bar.
+    c["accent"] = push(c["accent"], [(c["background"], 4.5), (c["lighter_background"], 4.5)], away)
+```
+3. At the end of `tune()`, before `return c`, derive the Hyprland borders from
+   the tuned colors instead of the raw palette:
+```python
+    c["hyprland_active_border"] = f"rgb({c['accent'][1:]})"
+    c["hyprland_inactive_border"] = f"rgb({c['selection'][1:]})"
+```
+   Leave the two lines in `colors()` as they are; `tune()` overwrites them.
+
+Check the effect before writing tests:
+```sh
+python - <<'PY'
+from athanor_omarchy.palette import theme_colors, PALETTE
+for n in ("umber", "vellum"):
+    c = theme_colors(n)
+    print(n, c["accent"], c["hyprland_active_border"], c["hyprland_inactive_border"], PALETTE[n]["wall_desk"])
+PY
+```
+Expected, exactly:
+```
+umber #d49a3a rgb(d49a3a) rgb(3a3126) ['#16120e', '#5c4c39']
+vellum #764f06 rgb(764f06) rgb(c2b492) ['#a49b88', '#ece1c6']
+```
+If Vellum's accent is anything other than `#764f06`, stop and report.
+
+### 4.3 Palette tests
+
+In `tests/test_palette.py`:
+
+- Extend `test_accent_and_dim_text`:
+```python
+    assert contrast(c["accent"], c["lighter_background"]) >= 4.5
+```
+- Add:
+```python
+def test_hyprland_borders_follow_the_tuned_colors(theme):
+    _, c = theme
+    assert c["hyprland_active_border"] == f"rgb({c['accent'][1:]})"
+    assert c["hyprland_inactive_border"] == f"rgb({c['selection'][1:]})"
+
+
+def test_vellum_plate_ink_is_quieter_than_umber_but_visible():
+    """Review Improve 4: both desk plates sit between 2.0 and 2.4:1 ink on paper."""
+    for name in ("umber", "vellum"):
+        ink, paper = PALETTE[name]["wall_desk"]
+        assert 2.0 <= contrast(ink, paper) <= 2.4, name
+```
+- Also assert the bar: in `test_bar_and_tooltip`, add
+  `assert contrast(theme_colors(name)["accent"], p["bar"]) >= 4.5`.
+
+### 4.4 Shell: drop `[launcher]`, fix the lock comment
+
+In `athanor_omarchy/shell.py`:
+- Delete the whole `"launcher": f"""…"""` entry from `shell_sections()`.
+- Replace the `[lock]` comment with:
+```
+# An opaque card over the blurred plate. The shell draws border-active while
+# idle and typing, border-error after a wrong word; `border` is parsed but
+# never drawn, and border-width reaches the card through border-active.
+```
+
+In `tests/test_shell.py`:
+- Rewrite the `READS_BORDER_WIDTH` comment's last sentence to:
+  `# [launcher] is not emitted at all: nothing in the shell reads it (omarchy 4.0.5).`
+- Add a guard that runs where Omarchy is installed and is skipped in CI:
+```python
+SHELL_QML = Path("/usr/share/omarchy/shell")
+
+
+@pytest.mark.skipif(not SHELL_QML.exists(), reason="needs an installed Omarchy")
+def test_launcher_section_is_still_unread():
+    """We stopped shipping shell.launcher.toml because no QML reads launcher.*.
+    If this fails after an Omarchy update, bring the section back in shell.py."""
+    hits = [p for p in SHELL_QML.rglob("*.qml") if re.search(r"\blauncher\.[a-z-]+", p.read_text())]
+    assert hits == [], hits
+```
+  Before adding it, run the search by hand and read any hit:
+  `rg -n '\blauncher\.[a-z-]+' /usr/share/omarchy/shell --glob '*.qml'`.
+  Expected: no output. If something unrelated matches (a plugin id, a route),
+  narrow the regex to that section's token style and say so in the comment.
+
+### 4.5 Snapshot check script
+
+Create `scripts/check-omarchy.sh`, executable:
+```sh
+#!/bin/bash
+# Compare the vendored Omarchy templates with the installed ones.
+# Run after `omarchy update`. Exit 1 if anything moved.
+set -u
+root=$(cd "$(dirname "$0")/.." && pwd)
+installed=/usr/share/omarchy/default/themed
+[[ -d $installed ]] || { echo "Omarchy isn't installed here" >&2; exit 2; }
+rc=0
+for pair in "assets/omarchy/themed/btop.theme.tpl:btop.theme.tpl" \
+            "assets/omarchy/themed/vscode-theme.json.tpl:vscode-theme.json.tpl" \
+            "tests/fixtures/shell.toml.tpl:shell.toml.tpl"; do
+  ours=${pair%%:*}; theirs=${pair##*:}
+  if diff -q "$root/$ours" "$installed/$theirs" >/dev/null; then
+    echo "same     $ours"
+  else
+    echo "CHANGED  $ours  (see: diff $root/$ours $installed/$theirs)"; rc=1
+  fi
+done
+echo "omarchy $(pacman -Q omarchy 2>/dev/null | cut -d' ' -f2)"
+exit $rc
+```
+Run it: expected three `same` lines and `omarchy 4.0.5-1`.
+
+### 4.6 Docs in this repo
+
+- `CLAUDE.md`: test count in the Commands block (read it from the pytest
+  summary); the `shell.<section>.toml` gotcha now says `[launcher]` isn't
+  emitted; the snapshots gotcha says "from omarchy 4.0.4, unchanged in 4.0.5;
+  run `scripts/check-omarchy.sh` after an update".
+- `README.md` (source repo): add `scripts/check-omarchy.sh` to the Test
+  section and the Layout table.
+- `athanor_omarchy/readme.py`: no change yet (Phase 6 rewrites the numbers).
+
+### 4.7 Build and verify
+
+```sh
+uv run --no-project --with pytest pytest -q                    # expected: all pass
+python -m athanor_omarchy build
+ls dist/athanor-vellum/shell.*.toml | wc -l                     # expected: 9
+grep -c . dist/athanor-vellum/shell.launcher.toml 2>&1 | head -1 # expected: No such file
+grep -E '^(accent|hyprland_inactive_border)' dist/athanor-vellum/colors.toml
+# expected: accent = "#764f06"  and  hyprland_inactive_border = "rgb(c2b492)"
+magick dist/athanor-vellum/backgrounds/1-merlin-and-the-king.png -format %c histogram:info:- | sed 's/.*#/#/' | cut -c1-7 | sort -u
+# expected: exactly #A49B88 and #ECE1C6
+python -m athanor_omarchy diff dist/athanor-umber ~/.config/omarchy/themes/athanor-umber
+# expected: A btop.theme, A vscode-theme.json, D shell.launcher.toml, M shell.lock.toml, M README.md, M preview.png — nothing else
+```
+
+On screen, with the temporary Vellum theme (see "How to run a phase"): the
+bar's clock and the active-module color, the first plate on workspace 1, and
+`omarchy menu summon` for the menu card. `grim` one shot of each to the
+scratchpad and look at them. Then restore the theme. Run
+`hyprctl configerrors`: expected empty.
+
+### 4.8 Deliver
+
+Files: `athanor_omarchy/palette.py`, `athanor_omarchy/shell.py`,
+`tests/test_palette.py`, `tests/test_shell.py`, `tests/test_apps.py`,
+`tests/fixtures/omarchy-generated/*/colors.toml`, `scripts/check-omarchy.sh`,
+`CLAUDE.md`, `README.md`, `docs/PLAN.md`.
+
+PR title: `Phase 4: palette and shell fixes from the review`. Body: the three
+fixes with their before/after ratios from 4.2 and 4.3, the plate ink change,
+and the `diff` output from 4.7.
 
 **Acceptance**
-- `build` reproduces both themes' current `main`: text files byte-identical, PNGs pixel-identical (`magick compare -metric AE` = 0).
-- `publish.sh umber` with no changes reports "nothing to publish".
+- Tests pass on 3.11 and 3.13.
+- The `python -` check in 4.2 prints the expected two lines.
+- `dist/athanor-umber/colors.toml` is byte-identical to the published one.
+- Screenshots show the new accent on the bar and the darker plate on Vellum.
 
-## Phase 1: Tests and CI (about 1–1.5 h): done
+## Phase 5: Previews that show the shell (about 1 h)
 
-Lock in what this session tuned by hand.
+Review Improve 5. The current previews never show a shell surface, and the
+Neovim pane is mostly empty. Needs the desktop; it can't run in CI.
 
-**Outcome.** 143 tests, run in CI on Python 3.11 and 3.13 and required on `main`. Writing them found two issues:
-- `[launcher]` set `border-width`, which nothing reads: the menu plugin draws the launcher with `[menu]` tokens. Removed. The theme repos pick this up in Phase 5.
-- The first version of the ramp test used an arbitrary 1.3:1 limit for recessed backgrounds. It now requires them to stay quieter than the selection.
+### 5.1 Script changes
 
-Weakening the background floor changed nothing, because it never binds: text that clears 4.5:1 on `lighter_background` already has about 5.3:1 on the background. Weakening the `lighter_background` floor fails 10 tests.
+In `scripts/shoot-previews.sh`:
+1. Stage a second file: after the `cp … planetary.c` line add
+   `cp "$root/vendor/athanor/README.md" "$stage/"`.
+2. Open Neovim with both files side by side:
+   `foot --app-id "$app" -D "$stage" nvim -O planetary.c README.md 2>/dev/null &`
+3. After the three-pane guard passes and before `grim`, open the menu:
+```sh
+    omarchy menu summon >/dev/null 2>&1
+    sleep 1.5
+```
+   and after `grim`, close it: `omarchy menu close >/dev/null 2>&1`.
+   Also call `omarchy menu close` in `cleanup()` so an abort never leaves it
+   open.
+4. The menu is a layer surface, not a client, so the helper count stays 3; do
+   not change that guard.
 
-**Scope**
-- `pytest` suite:
-  - Contrast floors: ANSI on background ≥ 5.0, on `lighter_background` ≥ 4.5, on selection ≥ 3.0; bright vs normal ≥ 1.2; inverted menu ≥ 7; tooltip ≥ 4.5.
-  - Ramp order: the neutrals read darkest to lightest (dark theme) or the reverse (light theme).
-  - Shell completeness: each `shell.<section>.toml` restates every key in that section of a vendored snapshot of `shell.toml.tpl`, since a section file replaces the whole section.
-  - `colors.toml` holds only the canonical keys, in canonical groups.
-- GitHub Actions: run the tests on every PR, and add them as a required check on `main`.
+### 5.2 Run and check
 
-**Acceptance**: CI is green, and changing one color to break a floor makes CI fail.
+```sh
+scripts/shoot-previews.sh vellum      # takes over the screen for ~20 s
+scripts/shoot-previews.sh umber
+```
+Expected: two `saved assets/previews/<theme>.png` lines, the layout JSON the
+same for both, no `ABORT`. Open both PNGs and check: the menu card is visible
+in the middle, Neovim shows two columns, and nothing personal is readable (the
+script's OCR already refused anything in its list; read the image anyway).
 
-## Phase 2: App contrast fixes (about 1.5 h): done
+If the menu doesn't appear within 1.5 s, raise the sleep to 3 and re-run; if
+it still doesn't, stop and report with the raw shot kept in `dist/previews/`.
 
-Fix findings 2, 3 and 7 without touching the palette's identity.
+### 5.3 Docs
 
-**Outcome.**
-- `athanor_omarchy/apps.py` renders the two templates, snapshotted from omarchy 4.0.4 in `assets/omarchy/themed/` so CI doesn't need Omarchy, then applies three exact-match patches.
-- A test checks that the unpatched render equals what `omarchy theme set` generated, byte for byte, on both themes.
-- On screen, through temporary preview themes:
-  - Vellum's btop selected row reads in ink.
-  - VS Code selections render opaque: `#393126` on Umber, about 1.46:1.
-  - The current line is exactly `lighter_background` on both themes.
-- The VS Code visibility floor is 1.25:1, grounded in the 22 stock themes (selection 1.21–2.45:1, median 1.43). Unpublished Cinnabar sits at 1.40.
+- `athanor_omarchy/readme.py`: alt text becomes
+  `Athanor {label} desktop with the Omarchy menu, Neovim, fastfetch and the terminal palette`.
+- `README.md` (source): the Previews paragraph mentions the menu card.
 
-**Scope**
-- Render `btop.theme.tpl` and `vscode-theme.json.tpl` from the Omarchy templates at build time (plain `{{ key }}` substitution, including the derived `selection_background`, `selection_foreground` and `theme_type`), then apply targeted patches:
-  - **btop** (Vellum, and Umber for consistency): `selected_fg = foreground` instead of `accent`. Text on the selected row rises to 8.48:1 (Vellum) and 8.85:1 (Umber), and the selection keeps its own color.
-  - **VS Code**: an opaque `editor.selectionBackground = selection`, and `editor.lineHighlightBackground = lighter_background`. Blended selection visibility rises from about 1.15 to about 1.5:1 against the background, and the current line shows.
-- Add contrast tests for both pairs, and drop the dead `lock.border` value. The template key stays, but it gets the same value as `border-active`, so nothing reads misleadingly.
+### 5.4 Deliver
 
-**Rejected alternatives (measured)**
-- Darkening Vellum's accent to `#643f00` fixes btop (4.54:1) but darkens every amber border and the bar's identity.
-- Lifting Umber's selection globally only gets VS Code to 1.27:1, and drops terminal text on selection below 3:1.
+Files: `scripts/shoot-previews.sh`, `assets/previews/umber.png`,
+`assets/previews/vellum.png`, `athanor_omarchy/readme.py`, `README.md`,
+`docs/PLAN.md`. PR title: `Phase 5: previews that show the shell`.
 
-**Files**: per theme, new `btop.theme`, `vscode-theme.json` and `shell.lock.toml`, plus tests.
+**Acceptance**: both PNGs are 1800×1012 (`magick identify`), both show the
+menu, two consecutive runs give the same layout JSON, tests pass.
 
-**Acceptance**
-- The tests pass.
-- Applied with `omarchy theme set`: the btop selected row is readable on Vellum, and a VS Code selection and current line are visible on both, checked with screenshots.
-- `hyprctl configerrors` is clean.
+## Phase 6: README template and opt-in extras (about 1.5 h)
 
-## Phase 3: Reproducible, private previews (about 1 h): done
+Review items Opt-in 7–10 and the old Phase 4 scope. The README is rendered by
+`athanor_omarchy/readme.py`; every number in it is computed.
 
-Fix finding 4.
+### 6.1 Measured numbers
 
-**Outcome.** `scripts/shoot-previews.sh` replaced both previews.
-- The OCR check covers `$USER`, the hostname, `/home/` and the DMI product name and version.
-- Two runs gave identical window geometry.
-- Changes from the scope:
-  - The third pane also lists Athanor's source tree with plain `ls`. Its history is only 3 commits, and `ls -l` would print the owner's username.
-  - fastfetch's logo and keys use ANSI yellow, so they follow each theme instead of fastfetch's built-in lime.
-  - fastfetch's shell and terminal lines were dropped: it reads both from its parent processes, which the script controls.
+In `readme.py`, replace the hard-coded floors paragraph ("at least 5:1 …",
+"Body text is above 12:1") with values computed from `c`:
 
-**Scope**
-- `scripts/shoot-previews.sh`, the guarded version from this session:
-  - focuses an empty workspace 9 and aborts if any helper window lands elsewhere
-  - closes its helpers by PID and returns to your previous workspace
-  - uses Lua `hl.dsp.focus`, since `hyprctl dispatch workspace` doesn't work with your config
-- Neutral content:
-  - Neovim with Athanor's `planetary.c`
-  - fastfetch with a bundled config that hides host, user, model and disk
-  - a pane with colored `git log` and a palette strip instead of btop's process list
-- Output `preview.png` at 1800×1012, as before.
+```python
+from .color import contrast
+from .palette import TEXT
+...
+    floor = lambda surface: min(contrast(c[k], c[surface]) for k in TEXT)
+    body = contrast(c["foreground"], c["background"])
+```
+and render:
+```
+- at least {floor("background"):.1f}:1 on the background
+- at least {floor("lighter_background"):.1f}:1 on raised surfaces, such as editor cursorlines and herdr or Helix panels
+- at least {floor("selection"):.1f}:1 inside a selection
 
-**Acceptance**: no hostname, username, home path or hardware model appears in either preview (checked by eye and with OCR via `tesseract`, if installed). Running the script twice gives the same layout.
+Body text is {body:.1f}:1.
+```
+Expected after Phase 4: Umber 5.3 / 4.5 / 3.6 and 12.9; Vellum 5.1 / 4.5 /
+3.2 and 13.4 (run `python -m athanor_omarchy build` and read `dist/*/README.md`).
 
-## Phase 4: Docs and opt-in extras (about 1 h)
+### 6.2 The opt-in section
 
-Fix findings 5 and 6.
+Add a `## Make it feel like Athanor` section after "Wallpapers", with this
+content (keep the wording; fill nothing in by hand):
 
-**Scope**
-- READMEs rendered from one template in `readme.py`, with every number and hex value read from the built palette and the test results, never typed in.
-- A new "Make it feel like Athanor" README section with opt-in snippets the user pastes into their own config. The theme still ships no code:
-  - `~/.config/hypr/looknfeel.lua`: square corners (`rounding = 0`) and `border_size = 2`. The shell copies Hyprland's rounding, so menus go square too.
-  - a pixel font, e.g. Terminus or Cozette via `omarchy font set`, with the install line
-  - note that replacement notification or lock plugins (e.g. `omapager`, `lock-explorer`) draw themselves
-- The source repo's README explains how to build, test and publish.
+- Intro: Omarchy already draws square corners with 2px borders, which is most
+  of Athanor's frame. The rest is yours to opt into; the theme ships no code.
+- **Quieter motion.** In `~/.config/hypr/looknfeel.lua`:
+  ```lua
+  hl.config({ animations = { enabled = false } })
+  ```
+- **Opaque terminals.** Omarchy draws every window at 0.985 opacity, and on a
+  light theme the plate shows through. In `looknfeel.lua`:
+  ```lua
+  o.window({ tag = "terminal" }, { opacity = "1 1" })
+  ```
+- **Denser shell.** `~/.config/omarchy/shell.toml` overrides single keys on
+  top of any theme:
+  ```toml
+  [spacing]
+  scale = 0.9
+  [font]
+  base-size = 13
+  ```
+- **Bitmap fonts.** `omarchy font set` with Terminus or Cozette
+  (`omarchy pkg add terminus-font` or `ttf-cozette`). Athanor's own Px437
+  faces also need its fontconfig snippet, which turns antialiasing off; link
+  `vendor/athanor/config/fontconfig/60-athanor.conf`.
+- Note that replacement notification or lock plugins (`omapager`,
+  `lock-explorer`) draw themselves and ignore the theme's shell sections.
 
-**Acceptance**: the READMEs build from the template, and `publish.sh` shows README-only diffs. Each snippet is applied once by hand on this machine and works: `hyprctl configerrors` is clean, then the change is reverted.
+Before writing the numbers for the shell snippet, try them: put the four
+lines in `~/.config/omarchy/shell.toml` (back it up first; it currently holds
+`[font] base-size = 12`), look at the bar and a menu, and keep whichever of
+`0.9`/`13` or `0.85`/`12` reads closest to a 24px bar. Restore the backup.
 
-## Phase 5: Publish (about 30 min)
+Apply each other snippet once in `looknfeel.lua`, run `hyprctl configerrors`
+(expected empty), look, and revert.
 
-**Scope**
-- `publish.sh umber` and `publish.sh vellum` open one PR per theme repo with Phases 2–4.
-- Rebase-merge after review, then `omarchy theme update` locally and re-apply.
+### 6.3 Tests and docs
 
-**Acceptance**: both PRs pass, merge, and a fresh `omarchy theme install` of each repo applies cleanly.
+- `tests/test_readme.py`: add an assertion that the README contains
+  `## Make it feel like Athanor` and the string `o.window({ tag = "terminal" }`.
+- The "What's in it" table in `readme.py` loses nothing; `shell.*.toml` is
+  now nine files, which the table doesn't count.
+- Source `README.md`: nothing new.
+
+### 6.4 Deliver
+
+Files: `athanor_omarchy/readme.py`, `tests/test_readme.py`, `docs/PLAN.md`.
+PR title: `Phase 6: README from measured numbers, with the opt-in section`.
+
+**Acceptance**: tests pass; `scripts/publish.sh vellum` (dry run) lists
+`README.md` among the changes; each snippet was applied and reverted with a
+clean `hyprctl configerrors`.
+
+## Phase 7: Publish (about 45 min)
+
+### 7.1 Dry runs
+
+```sh
+scripts/publish.sh umber
+scripts/publish.sh vellum
+```
+Expected Umber: `A btop.theme`, `A vscode-theme.json`, `D shell.launcher.toml`,
+`M README.md`, `M preview.png`, `M shell.lock.toml`. Expected Vellum: the same
+plus `M colors.toml` and `M backgrounds/1-…png` through `7-…png` (the lock
+plate `8-satans-despair.png` keeps its own ink and must not appear). Anything
+else: stop and report.
+
+### 7.2 Open the PRs
+
+```sh
+scripts/publish.sh umber -m "Athanor Umber: app fixes, private preview, README
+
+btop and VS Code themes with readable selections, a preview without personal
+details, the dead shell.launcher.toml removed, and a README with measured
+contrast and the opt-in section."
+scripts/publish.sh vellum -m "Athanor Vellum: accent and plate contrast, app fixes, README
+
+Accent #764f06 (4.5:1 on raised panels and the bar), desk plates at 2.1:1 ink
+on paper, btop and VS Code themes with readable selections, a preview without
+personal details, the dead shell.launcher.toml removed, and a README with
+measured contrast and the opt-in section."
+```
+Each prints a PR URL. Wait for Raúl to merge both (rebase).
+
+### 7.3 After the merges
+
+```sh
+omarchy theme update                       # pulls both clones
+omarchy theme set athanor-vellum; sleep 3; hyprctl configerrors    # expected empty
+omarchy theme set athanor-umber;  sleep 3; hyprctl configerrors    # expected empty
+tmp=$(mktemp -d); git clone -q https://github.com/nacapulque/omarchy-athanor-umber-theme "$tmp/umber"
+python -m athanor_omarchy diff dist/athanor-umber "$tmp/umber"; echo "exit $?"   # expected: exit 0
+```
+Repeat the clone check for Vellum. Then record the new theme-repo commits in
+"Resume here", re-render the plan, and open a last PR with only `docs/PLAN.md`.
+
+**Acceptance**: both theme PRs merged; both `diff` checks exit 0; both themes
+apply with a clean `hyprctl configerrors`.
 
 ## Later (not in this plan)
 
-- **Intro videos**: once Omarchy ships intro support, a 5–7 s clip per plate where the dither "develops" from noise into the engraving (ImageMagick frames into ffmpeg).
-- **Orpiment and Cinnabar**: with Phases 0–1 in place, publishing them is `build` plus `publish`.
-- **Omarchy theme gallery**: submit once the previews are clean.
+- **Intro videos**: stock themes already ship `backgrounds/intros/*.mp4`, but
+  omarchy 4.0.5 doesn't read them. Once it does: a 5–7 s clip per plate where
+  the dither develops from noise into the engraving.
+- **Orpiment and Cinnabar**: `build` plus `publish`, after a contrast pass.
+- **Omarchy theme gallery**: submit once Phase 7 is merged.
 
 ## Assumptions
 
-- You want the theme repos to stay lean, with no build tooling in what users clone.
-- Rendering the btop and VS Code templates at build time is acceptable, even though it ties our files to the Omarchy version present when we build. The tests catch missing keys if the templates change.
+- The theme repos stay lean: no build tooling in what users clone.
+- Rendering the btop and VS Code templates at build time is acceptable;
+  `scripts/check-omarchy.sh` and the tests catch template drift.
 - GitHub Actions minutes for a small public repo are fine.
