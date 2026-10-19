@@ -7,6 +7,13 @@ from .paths import ATHANOR
 
 PALETTE = tomllib.loads((ATHANOR / "src/athanor/palette.toml").read_text())
 
+# Per-theme values that differ from Athanor's palette.toml on purpose.
+# Vellum's desk plates were 1.49:1 ink on paper, half of Umber's 2.26:1;
+# this ink is paper mixed 35% toward the foreground, 2.12:1 (docs/REVIEW.md, Improve 4).
+OVERRIDES = {"vellum": {"wall_desk": ["#a49b88", "#ece1c6"]}}
+for _name, _values in OVERRIDES.items():
+    PALETTE[_name].update(_values)
+
 # Per-theme facts Athanor's palette doesn't carry.
 THEMES = {
     "umber": {"mode": "dark", "stage": "nigredo", "gloss": "the blackening", "icons": "Yaru-wartybrown",
@@ -96,7 +103,11 @@ def tune(c):
         c[k] = push(c[k], floors, away)
     for k in HUES:
         c["bright_" + k] = push(c["bright_" + k], [*floors, (c[k], 1.2)], away)
+    # Accent is text on raised panels (Helix, herdr, btop headers) and on the bar.
+    c["accent"] = push(c["accent"], [(c["background"], 4.5), (c["lighter_background"], 4.5)], away)
     c["dark_foreground"] = push(c["dark_foreground"], [(c["background"], 3.0)], away)
+    c["hyprland_active_border"] = f"rgb({c['accent'][1:]})"
+    c["hyprland_inactive_border"] = f"rgb({c['selection'][1:]})"
     return c
 
 

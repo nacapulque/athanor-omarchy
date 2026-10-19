@@ -35,6 +35,9 @@ each `shell.<section>.toml` restates its whole section of Omarchy's template
 (snapshotted in `tests/fixtures/`). The end-to-end build test needs ImageMagick
 7 and skips without it. CI runs everything else on every PR.
 
+After an Omarchy update, `scripts/check-omarchy.sh` compares the vendored
+templates with the installed ones and says which, if any, moved.
+
 ## Publish
 
 ```sh
@@ -87,6 +90,7 @@ and takes over the screen for about 20 seconds per theme.
 | `assets/omarchy/` | Omarchy's unlock wordmark and logo wallpaper, recolored per theme |
 | `assets/previews/` | Desktop screenshots used as each theme's `preview.png`, from `scripts/shoot-previews.sh` |
 | `assets/preview/` | What the preview panes run |
+| `scripts/check-omarchy.sh` | Diffs the vendored Omarchy templates against `/usr/share/omarchy` |
 
 The plan for this repo and its current status are in
 [docs/PLAN.md](docs/PLAN.md). Render it with

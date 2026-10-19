@@ -12,7 +12,8 @@ Plan and current status: `docs/PLAN.md`. Start at "Resume here".
 ```sh
 git submodule update --init                        # vendor/athanor; needed in every new worktree
 python -m athanor_omarchy build [--theme umber]    # into dist/; prints key contrast ratios
-uv run --no-project --with pytest pytest           # 157 tests; the build test needs ImageMagick 7
+uv run --no-project --with pytest pytest           # 163 tests; the build test needs ImageMagick 7
+scripts/check-omarchy.sh                           # vendored Omarchy templates vs the installed ones; run after `omarchy update`
 python -m athanor_omarchy diff dist/athanor-umber ~/.config/omarchy/themes/athanor-umber
 scripts/publish.sh umber                           # dry run: build and list what would change
 scripts/publish.sh umber -m "Subject"              # branch, commit, push and open a PR on the theme repo
@@ -35,9 +36,9 @@ python -I scripts/render-plan.py docs/PLAN.md ~/claude-plan.html   # after every
 - **`hyprctl dispatch workspace N` silently fails** on this Lua-config Hyprland. Use `hyprctl dispatch 'hl.dsp.focus({ workspace = "N" })'`.
 - **Screen-taking scripts** must guard workspace 9 (empty before, every helper on it), close helpers by exact app ID or command line, and restore the workspace and theme on exit. VS Code's window class is `com.microsoft.VSCode`, and its launcher reorders arguments.
 - **Screenshots of this desktop** can capture personal windows. Keep them out of commits unless they come from `shoot-previews.sh`, which checks them with OCR.
-- **`shell.<section>.toml` replaces its whole section.** Restate every key; `tests/test_shell.py` enforces it against `tests/fixtures/shell.toml.tpl`. `[launcher]` is unread in omarchy 4.0.4, because the menu plugin uses `[menu]`.
+- **`shell.<section>.toml` replaces its whole section.** Restate every key; `tests/test_shell.py` enforces it against `tests/fixtures/shell.toml.tpl`. `[launcher]` isn't emitted: nothing in the shell reads it (the launcher draws with `[menu]`), and a test on this machine fails the day that changes.
 - **The user's machine** runs `omapager` and `lock-explorer` instead of Omarchy's notifications and lock, so those sections barely show here.
-- **Omarchy snapshots** (`assets/omarchy/`, `tests/fixtures/`) are from omarchy 4.0.4. After an Omarchy update, refresh them, and the tests will show what moved.
+- **Omarchy snapshots** (`assets/omarchy/`, `tests/fixtures/`) are from omarchy 4.0.4 and unchanged in 4.0.5. After an Omarchy update, run `scripts/check-omarchy.sh`; if it reports a change, refresh the snapshot and the tests will show what moved. `tests/fixtures/omarchy-generated/*/colors.toml` pins the colors the generated app files came from; it only changes when those files are regenerated.
 - **PNG bytes differ between identical builds** (ImageMagick timestamps). `diff` and `publish.sh` compare PNGs by pixels.
 
 ## Conventions

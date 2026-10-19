@@ -25,6 +25,10 @@ def build_theme(name, out, width=3840, height=2160, pixel=4):
     (d / "btop.theme").write_text(apps.btop_theme(c))
     (d / "vscode-theme.json").write_text(apps.vscode_theme(c))
     (d / "icons.theme").write_text(THEMES[name]["icons"] + "\n")
+    # A section we stop emitting must not linger from an earlier build, or `diff`
+    # and publish.sh would never report its removal.
+    for stale in d.glob("shell.*.toml"):
+        stale.unlink()
     (d / "shell.bar.toml").write_text(bar_section(p))
     for section, body in shell_sections(p, c).items():
         (d / f"shell.{section}.toml").write_text(f"[{section}]\n" + body)

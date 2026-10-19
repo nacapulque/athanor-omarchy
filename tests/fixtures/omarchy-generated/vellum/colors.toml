@@ -1,0 +1,36 @@
+# Athanor Vellum (albedo), from script-wizards/athanor palette.toml
+
+mode = "light"
+
+accent = "#7c5510"
+selection = "#c2b492"
+muted = "#635441"
+
+background = "#ece1c6"
+dark_background = "#dfd3b6"
+darker_background = "#d2c6a6"
+lighter_background = "#d8cbac"
+
+foreground = "#1f1914"
+dark_foreground = "#8d7f6a"
+light_foreground = "#3f352a"
+bright_foreground = "#1f1914"
+
+red = "#993421"
+yellow = "#764f06"
+orange = "#8b4519"
+green = "#525b20"
+cyan = "#375f49"
+blue = "#3f5570"
+magenta = "#7a3f4c"
+brown = "#573d12"
+
+bright_red = "#7f2a1a"
+bright_yellow = "#654405"
+bright_green = "#464e1b"
+bright_cyan = "#305240"
+bright_blue = "#33465c"
+bright_magenta = "#64323e"
+
+hyprland_active_border = "rgb(7c5510)"
+hyprland_inactive_border = "rgb(b9aa86)"

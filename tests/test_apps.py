@@ -2,6 +2,7 @@
 
 import json
 import re
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -17,9 +18,11 @@ GENERATED = Path(__file__).parent / "fixtures/omarchy-generated"
 @pytest.mark.parametrize("name", ["umber", "vellum"])
 @pytest.mark.parametrize("template", ["btop.theme", "vscode-theme.json"])
 def test_render_matches_omarchy(name, template):
-    """Before our patches, the renderer reproduces Omarchy's own output byte for byte."""
+    """Before our patches, the renderer reproduces Omarchy's own output byte for byte,
+    given the colors.toml those files were generated from."""
+    colors = tomllib.loads((GENERATED / name / "colors.toml").read_text())
     tpl = (apps.TEMPLATES / f"{template}.tpl").read_text()
-    assert apps.render(tpl, theme_colors(name)) == (GENERATED / name / template).read_text()
+    assert apps.render(tpl, colors) == (GENERATED / name / template).read_text()
 
 
 @pytest.mark.parametrize("name", list(PALETTE))

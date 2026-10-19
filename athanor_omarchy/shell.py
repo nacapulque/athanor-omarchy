@@ -74,19 +74,6 @@ border-alpha     = 1.0
 border-width     = 2
 countdown        = "{accent}"
 """,
-        "launcher": f"""background                = "{bg}"
-background-alpha          = 1.0
-text                      = "{fg}"
-border                    = "{accent}"
-border-alpha              = 1.0
-scrim                     = "{bg}"
-scrim-alpha               = 0.6
-selected-background       = "{fg}"
-selected-background-alpha = 1.0
-selected-text             = "{bg}"
-selected-border           = "{fg}"
-selected-border-alpha     = 0.0
-""",
         "menu": f"""background                = "{bg}"
 background-alpha          = 1.0
 text                      = "{fg}"
@@ -113,8 +100,9 @@ scrim            = "{bg}"
 scrim-alpha      = 0.75
 accent           = "{accent}"
 """,
-        "lock": f"""# An opaque card over the blurred plate, ruled in amber and red when the
-# word is wrong. The shell draws only border-active and border-error.
+        "lock": f"""# An opaque card over the blurred plate. The shell draws border-active while
+# idle and typing, border-error after a wrong word; `border` is parsed but
+# never drawn, and border-width reaches the card through border-active.
 background       = "{bg}"
 background-alpha = 1.0
 text             = "{fg}"

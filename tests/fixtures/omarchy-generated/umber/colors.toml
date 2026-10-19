@@ -1,0 +1,36 @@
+# Athanor Umber (nigredo), from script-wizards/athanor palette.toml
+
+mode = "dark"
+
+accent = "#d49a3a"
+selection = "#3a3126"
+muted = "#97876e"
+
+background = "#16120e"
+dark_background = "#0f0d0a"
+darker_background = "#0b0907"
+lighter_background = "#28221a"
+
+foreground = "#e3d6b8"
+dark_foreground = "#6c604e"
+light_foreground = "#c1b297"
+bright_foreground = "#f3ead3"
+
+red = "#dc684a"
+yellow = "#d49a3a"
+orange = "#d37c3e"
+green = "#8f9a5a"
+cyan = "#7aa08c"
+blue = "#7f93a8"
+magenta = "#b47b85"
+brown = "#6b4f22"
+
+bright_red = "#e77c5f"
+bright_yellow = "#e8bd6a"
+bright_green = "#b0b878"
+bright_cyan = "#9fc0ab"
+bright_blue = "#a3b3c2"
+bright_magenta = "#c9939a"
+
+hyprland_active_border = "rgb(d49a3a)"
+hyprland_inactive_border = "rgb(3a3126)"
