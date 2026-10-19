@@ -68,9 +68,10 @@ scripts/shoot-previews.sh vellum
 
 This takes each theme's `preview.png` on the real desktop. It applies the
 build as a temporary `athanor-<theme>-preview` theme and opens three panes on
-an empty workspace 9: Neovim with Athanor's `planetary.c`, a fastfetch that
-lists only software (`assets/preview/fastfetch.jsonc`), and Athanor's git
-history with the palette (`assets/preview/pane.sh`). It OCRs the shot and
+an empty workspace 9: Neovim with Athanor's `planetary.c` and README side by
+side, a fastfetch that lists only software (`assets/preview/fastfetch.jsonc`),
+and Athanor's git history with the palette (`assets/preview/pane.sh`), then
+summons the Omarchy menu so the shell styling is in the shot. It OCRs the shot and
 refuses to save it if your username, hostname, a home path or the hardware
 model shows up. It aborts if workspace 9 isn't empty or a pane lands
 elsewhere, and restores your workspace and theme when it exits. It needs a

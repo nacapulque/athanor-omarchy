@@ -5,8 +5,10 @@
 #   scripts/shoot-previews.sh vellum
 #
 # Each build is applied as a temporary user theme (athanor-<theme>-preview), and
-# three panes open on an empty workspace 9: Neovim with Athanor's planetary.c,
-# fastfetch limited to software, and Athanor's git history with the palette.
+# three panes open on an empty workspace 9: Neovim with Athanor's planetary.c
+# and README side by side, fastfetch limited to software, and Athanor's git
+# history with the palette. The Omarchy menu is summoned for the shot, so the
+# theme's shell styling shows.
 # The screenshot is OCR'd, and it's only saved to assets/previews/<theme>.png
 # when no username, hostname, home path or hardware model shows up in it.
 # Your workspace and theme are restored on exit, whatever happens.
@@ -32,6 +34,7 @@ close_helpers() {
   for _ in $(seq 20); do [[ $(helpers | jq length) == 0 ]] && break; sleep 0.25; done
 }
 cleanup() {
+  omarchy menu close >/dev/null 2>&1
   close_helpers
   omarchy theme set "$orig_theme" >/dev/null 2>&1
   rm -rf "$themes_dir"/athanor-*-preview "$stage"
@@ -47,7 +50,7 @@ for f in /sys/class/dmi/id/product_name /sys/class/dmi/id/product_version; do
 done
 
 mkdir -p "$stage" "$out"
-cp "$root/vendor/athanor/docs/screenshots/planetary.c" "$stage/"
+cp "$root/vendor/athanor/docs/screenshots/planetary.c" "$root/vendor/athanor/README.md" "$stage/"
 
 for theme in "${@:-umber vellum}"; do
   for t in $theme; do
@@ -62,7 +65,7 @@ for theme in "${@:-umber vellum}"; do
     [[ $(hyprctl activeworkspace -j | jq -r .id) == 9 ]] || fail "workspace 9 isn't focused"
     [[ $(hyprctl activeworkspace -j | jq -r .windows) == 0 ]] || fail "workspace 9 isn't empty"
 
-    foot --app-id "$app" -D "$stage" nvim planetary.c 2>/dev/null &
+    foot --app-id "$app" -D "$stage" nvim -O planetary.c README.md 2>/dev/null &
     sleep 1.5
     # fastfetch reads the terminal from its parent process, so foot runs it directly.
     foot --app-id "$app" -D "$stage" --hold fastfetch --config "$root/assets/preview/fastfetch.jsonc" 2>/dev/null &
@@ -72,7 +75,11 @@ for theme in "${@:-umber vellum}"; do
 
     [[ $(helpers | jq 'length == 3 and all(.[]; .workspace.id == 9)') == true ]] || fail "helper windows aren't all on workspace 9"
     [[ $(hyprctl activeworkspace -j | jq -r .id) == 9 ]] || fail "focus moved off workspace 9"
+    # The menu is a layer surface, not a client, so the helper count above stays 3.
+    omarchy menu summon >/dev/null 2>&1
+    sleep 1.5
     grim "$out/$t-raw.png" || fail "grim failed"
+    omarchy menu close >/dev/null 2>&1
     helpers | jq -c 'sort_by(.at[0], .at[1]) | map({at, size})' >"$out/$t-layout.json"
     close_helpers
 
